@@ -1,0 +1,8 @@
+fastapi
+pydantic[email]
+pydantic-settings
+uvicorn
+sqlalchemy
+alembic
+psycopg2
+bcrypt
