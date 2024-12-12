@@ -6,3 +6,4 @@ sqlalchemy
 alembic
 psycopg2
 bcrypt
+pyjwt

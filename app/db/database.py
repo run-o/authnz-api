@@ -6,7 +6,7 @@ from app.core.config import settings
 
 engine = create_engine(
     # TODO: enable ssl in postgres and switch back to {'sslmode':'require'}
-    settings.sqlalchemy_string, connect_args={'sslmode':'allow'}
+    settings.SQLALCHEMY_DB_URI, connect_args={'sslmode':'allow'}
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

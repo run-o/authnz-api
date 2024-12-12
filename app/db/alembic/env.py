@@ -23,7 +23,7 @@ from app.db.database import Base
 target_metadata = Base.metadata
 
 from app.core.config import settings
-config.set_main_option('sqlalchemy.url', settings.sqlalchemy_string)
+config.set_main_option('sqlalchemy.url', settings.SQLALCHEMY_DB_URI)
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
