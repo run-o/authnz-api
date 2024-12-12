@@ -2,9 +2,7 @@ from datetime import datetime, timedelta
 import bcrypt
 import jwt
 from app.core.config import settings
-from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 

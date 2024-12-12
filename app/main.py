@@ -2,9 +2,10 @@ import logging
 import jwt
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
+from typing import Annotated
 
 from fastapi import FastAPI, HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.db.database import engine, get_db, Base
 from app import schemas
 from app import models
@@ -30,22 +31,28 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='login')
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
     """ Extract user information from the JWT token. """
     try:
         payload = decode_auth_token(token)
         email = payload.get('email')
         if email is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="Invalid token",
+                                headers={"WWW-Authenticate": "Bearer"})
     except jwt.PyJWTError as exc:
         logger.info(f'Auth token failed validation: {str(exc)}')
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Invalid token",
+                            headers={"WWW-Authenticate": "Bearer"})
     
     user = crud.get_user_by_email(db, email)
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="User not found",
+                            headers={"WWW-Authenticate": "Bearer"})
     
     return user
 
@@ -85,22 +92,23 @@ def create_user(user_create: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 @app.post("/login")
-def login(email: str, password: str, db: Session = Depends(get_db)):
+def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)):
     """ Login user and return a JWT token. """
-
-    user = crud.get_user_by_email(db, email)
-    if not user or not verify_password(password, user.password_hash):
-       raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    user = crud.get_user_by_email(db, email=form_data.username)
+    if not user or not verify_password(form_data.password, user.password_hash):
+       raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                           detail="Invalid credentials",
+                           headers={"WWW-Authenticate": "Bearer"})
 
     auth_token = create_auth_token(data={
         'user_id': str(user.user_id),
         'email': user.email
     })
     
-    return {"auth_token": auth_token, "token_type": "bearer"}
+    return {"access_token": auth_token, "token_type": "bearer"}
 
 
-@app.get("/protected")
-def read_protected_data(current_user: models.User = Depends(get_current_user)):
+@app.get("/users/me")
+def get_authenticated_user(current_user: Annotated[schemas.User, Depends(get_current_user)]):
     """ Example of a protected route. """
     return {"message": f"Welcome {current_user.first_name}!"}
