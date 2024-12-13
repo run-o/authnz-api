@@ -33,26 +33,30 @@ app = FastAPI(lifespan=lifespan)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='login')
 
+def unauthorized_exception(message="Invalid token."):
+    """ Construct an unauthorized exception that follows the OAuth2 spec. """
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail=message,
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
     """ Extract user information from the JWT token. """
     try:
         payload = decode_auth_token(token)
         email = payload.get('email')
         if email is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="Invalid token",
-                                headers={"WWW-Authenticate": "Bearer"})
+            raise unauthorized_exception()
     except jwt.PyJWTError as exc:
         logger.info(f'Auth token failed validation: {str(exc)}')
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Invalid token",
-                            headers={"WWW-Authenticate": "Bearer"})
+        raise unauthorized_exception()
     
     user = crud.get_user_by_email(db, email)
+    user = None
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="User not found",
-                            headers={"WWW-Authenticate": "Bearer"})
+        raise unauthorized_exception("User not found.")
     
     return user
 
@@ -96,9 +100,7 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Sessio
     """ Login user and return a JWT token. """
     user = crud.get_user_by_email(db, email=form_data.username)
     if not user or not verify_password(form_data.password, user.password_hash):
-       raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                           detail="Invalid credentials",
-                           headers={"WWW-Authenticate": "Bearer"})
+       raise unauthorized_exception("Invalid credentials")
 
     auth_token = create_auth_token(data={
         'user_id': str(user.user_id),
