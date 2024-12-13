@@ -10,7 +10,7 @@ from app.db.database import engine, get_db, Base
 from app import schemas
 from app import models
 from app import crud
-from app.core.utils import verify_password, create_auth_token, decode_auth_token
+from app.core.security import verify_password, create_auth_token, decode_auth_token
 
 
 logging.basicConfig(level=logging.INFO)
