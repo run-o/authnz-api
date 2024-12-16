@@ -1,4 +1,5 @@
-from typing import Annotated
+import logging
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -9,12 +10,13 @@ from app import schemas
 from app import models
 from app import crud
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get('/by_email', response_model=schemas.User, status_code=status.HTTP_200_OK)
-def get_user(email: str, db: Session = Depends(get_db)) -> models.User:
+def get_user(email: str, db: Session = Depends(get_db)) -> Any:
     """ Retrieve a user by email. """
     user = crud.get_user_by_email(db, email)
     if not user:
@@ -26,7 +28,7 @@ def get_user(email: str, db: Session = Depends(get_db)) -> models.User:
 
 
 @router.post('/', response_model=schemas.User)
-def create_user(user_create: schemas.UserCreate, db: Session = Depends(get_db)):
+def create_user(user_create: schemas.UserCreate, db: Session = Depends(get_db)) -> Any:
     """ Create a new user. """
     # Check if email is already registered:
     existing_user = crud.get_user_by_email(db, user_create.email)
