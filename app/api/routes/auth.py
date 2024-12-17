@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.core.security import verify_password, create_auth_token
-from app.api.deps import unauthorized_exception
+from app.api.deps import UnauthorizedException
 from app import crud
 
 router = APIRouter(tags=["auth"])
@@ -17,7 +17,7 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Sessio
     """ Login user and return a JWT token. """
     user = crud.get_user_by_email(db, email=form_data.username)
     if not user or not verify_password(form_data.password, user.password_hash):
-       raise unauthorized_exception("Invalid credentials")
+       raise UnauthorizedException("Invalid credentials")
 
     auth_token = create_auth_token(data={
         'user_id': str(user.user_id),

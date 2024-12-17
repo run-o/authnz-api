@@ -5,14 +5,19 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.api.deps import get_current_user
+from app.api.deps import AuthenticationRequired
 from app import schemas
 from app import models
 from app import crud
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/user_data", tags=["User Data"])
+router = APIRouter(
+    prefix="/user_data",
+    tags=["User Data"],
+    # all User Data routes require authentication:
+    dependencies=[Depends(AuthenticationRequired)]
+)
 
 
 @router.get('/by_email', response_model=list[schemas.UserData], status_code=status.HTTP_200_OK)

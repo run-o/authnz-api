@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.api.deps import get_current_user
+from app.api.deps import AuthenticatedContext, get_auth_context
 from app import schemas
 from app import models
 from app import crud
@@ -16,9 +16,12 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get('/by_email', response_model=schemas.User, status_code=status.HTTP_200_OK)
-def get_user(email: str, db: Session = Depends(get_db)) -> Any:
+def get_user(
+    email: str, 
+    auth_context: Annotated[AuthenticatedContext, Depends(get_auth_context)]
+) -> Any:
     """ Retrieve a user by email. """
-    user = crud.get_user_by_email(db, email)
+    user = crud.get_user_by_email(auth_context.db, email)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -28,15 +31,18 @@ def get_user(email: str, db: Session = Depends(get_db)) -> Any:
 
 
 @router.post('/', response_model=schemas.User)
-def create_user(user_create: schemas.UserCreate, db: Session = Depends(get_db)) -> Any:
+def create_user(
+    user_create: schemas.UserCreate,
+    auth_context: Annotated[AuthenticatedContext, Depends(get_auth_context)]
+) -> Any:
     """ Create a new user. """
     # Check if email is already registered:
-    existing_user = crud.get_user_by_email(db, user_create.email)
+    existing_user = crud.get_user_by_email(auth_context.db, user_create.email)
     if existing_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered.")
 
     try:
-        new_user = crud.create_user(db, user_create)
+        new_user = crud.create_user(auth_context.db, user_create)
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
 
@@ -44,6 +50,8 @@ def create_user(user_create: schemas.UserCreate, db: Session = Depends(get_db)) 
 
 
 @router.get("/me")
-def get_authenticated_user(current_user: Annotated[schemas.User, Depends(get_current_user)]):
+def get_authenticated_user(
+    auth_context: Annotated[AuthenticatedContext, Depends(get_auth_context)]
+) -> Any:
     """ Example of a protected route. """
-    return {"message": f"Welcome {current_user.first_name}!"}
+    return {"message": f"Welcome {auth_context.actor.first_name}!"}
