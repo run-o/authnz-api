@@ -4,7 +4,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.db.database import get_db
+from app.db import get_db
 from app.api.deps import AuthenticationRequired
 from app import schemas
 from app import models
@@ -41,3 +41,4 @@ def create_user_data(data_create: schemas.UserDataCreate, db: Session = Depends(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
 
     return new_user
+

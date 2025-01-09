@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 
 from app.models import User, UserData
 from app import schemas
-from app.core.security import hash_password
 
 
 def get_user_data_by_email(db: Session, email: str) -> List[UserData]:

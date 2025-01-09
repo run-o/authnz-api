@@ -2,12 +2,9 @@ import logging
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 
-from app.db.database import get_db
 from app.api.deps import AuthenticatedContext, get_auth_context
 from app import schemas
-from app import models
 from app import crud
 
 logger = logging.getLogger(__name__)

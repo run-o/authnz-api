@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 
-from app.db.database import get_db, set_db_actor_id
+from app.db import get_db
 from app.core.security import decode_auth_token
 from app import crud
 from app.models import User
@@ -44,7 +44,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session 
         raise UnauthorizedException()
     
     # set the actor id at the DB level:
-    set_db_actor_id(db, user_id) 
+    db.set_actor_id(user_id) 
     
     user = crud.get_user_by_email(db, email)
     if not user:
