@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import bcrypt
 import jwt
 from app.core.config import settings
@@ -23,8 +23,8 @@ def create_auth_token(data: dict, expires_delta: timedelta | None = None) -> str
     """ Generate a JWT token. """
     payload = data.copy()
     payload.update({
-        'exp': datetime.utcnow() + (expires_delta or timedelta(minutes=settings.AUTH_TOKEN_EXPIRE_MINUTES)),
-        'iat': datetime.utcnow(),
+        'exp': datetime.now(UTC) + (expires_delta or timedelta(minutes=settings.AUTH_TOKEN_EXPIRE_MINUTES)),
+        'iat': datetime.now(UTC),
     })
     return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm='HS256')
 
