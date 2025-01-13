@@ -3,15 +3,11 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from app.db.database import engine, Base
 from app.api.main import api_router
 
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# this will create the tables in postgres - move to Alembic later:
-Base.metadata.create_all(bind=engine)
 
 
 @asynccontextmanager

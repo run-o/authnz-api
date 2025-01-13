@@ -1,0 +1,3 @@
+[tool.pytest_env]
+SQLALCHEMY_DB_USER_URI="postgresql://authnz_user:authnz_user@localhost/authnz_test"
+SQLALCHEMY_DB_OWNER_URI="postgresql://authnz_owner:authnz_owner@localhost/authnz_test"

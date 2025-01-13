@@ -8,3 +8,4 @@ psycopg2
 bcrypt
 pyjwt
 python-multipart
+httpx
