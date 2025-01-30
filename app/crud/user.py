@@ -9,11 +9,9 @@ def get_user_by_email(db: Session, email: str) -> User:
     return db.query(User).filter(User.email == email).first()
 
 def create_user(db: Session, user_create: schemas.UserCreate) -> User:
-    # hash the password and create a new User instance:
     new_user = User(
-        first_name=user_create.first_name,
-        last_name=user_create.last_name,
-        email=user_create.email,
+        # get all fields from schema but exclude the password so we can hash it:
+        **user_create.model_dump(exclude={"password"}),
         password_hash=hash_password(user_create.password),
     )
     db.add(new_user)

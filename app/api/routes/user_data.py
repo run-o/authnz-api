@@ -1,6 +1,5 @@
 import logging
 from typing import Any
-import psycopg2
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -9,7 +8,6 @@ from sqlalchemy.exc import ProgrammingError
 from app.db import get_db
 from app.api.deps import AuthenticationRequired
 from app import schemas
-from app import models
 from app import crud
 
 logger = logging.getLogger(__name__)
