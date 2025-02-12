@@ -61,7 +61,7 @@ class TestCreateUserData:
         }
         
     def test_cannot_create_other_user_data(self, client, logged_in_user_token_header,
-                                           create_user, create_user_data):
+                                           create_user):
         other_user = create_user(email="otheruser@email.com")
                 
         auth_header = logged_in_user_token_header("loggedinuser@email.com")
@@ -79,7 +79,7 @@ class TestCreateUserData:
         }
         
     def test_can_create_own_data(self, client, logged_in_user_token_header,
-                                  create_user, create_user_data):
+                                 create_user):
         user = create_user(email="loggedinuser@email.com")     
         auth_header = logged_in_user_token_header("loggedinuser@email.com")
         response = client.post(

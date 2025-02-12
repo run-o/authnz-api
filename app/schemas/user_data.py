@@ -1,5 +1,5 @@
 import uuid
-from pydantic import BaseModel, AwareDatetime
+from pydantic import AwareDatetime, BaseModel, ConfigDict
 
 
 class UserDataBase(BaseModel):
@@ -13,4 +13,5 @@ class UserData(UserDataBase):
     data_id: uuid.UUID
     created_at: AwareDatetime
     updated_at: AwareDatetime
-        
+    
+    model_config = ConfigDict(from_attributes=True)

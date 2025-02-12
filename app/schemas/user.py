@@ -1,11 +1,10 @@
 import uuid
-from pydantic import BaseModel, AwareDatetime, EmailStr
+from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr
 from typing import Optional
 
 
 # Check this post for explanation about ORM model and pydantic schema:
 # https://stackoverflow.com/questions/73700879/interaction-between-pydantic-models-schemas-in-the-fastapi-tutorial
-# NOTE: orm_mode is no longer needed in pydantic 2
 
 class UserBase(BaseModel):
     first_name: str
@@ -19,4 +18,6 @@ class User(UserBase):
     user_id: uuid.UUID
     created_at: AwareDatetime
     updated_at: AwareDatetime
+    
+    model_config = ConfigDict(from_attributes=True)
         
